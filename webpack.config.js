@@ -23,7 +23,23 @@ module.exports = (env, argv) => {
         {
           test: /\.jsx?$/,
           exclude: /node_modules/,
-          use: 'babel-loader',
+          use: {
+            loader: 'babel-loader',
+            options: {
+              // Presets are defined here (not in babel.config.js) so the JSX
+              // transform follows webpack's mode. Babel's own env defaults to
+              // "development" when NODE_ENV is unset, which made production
+              // bundles import jsxDEV from react/jsx-dev-runtime (absent in
+              // production React) and render a blank page.
+              configFile: false,
+              babelrc: false,
+              cacheDirectory: true,
+              presets: [
+                ['@babel/preset-env', { targets: 'defaults', modules: false }],
+                ['@babel/preset-react', { runtime: 'automatic', development: !isProd }],
+              ],
+            },
+          },
         },
         {
           test: /\.css$/,
