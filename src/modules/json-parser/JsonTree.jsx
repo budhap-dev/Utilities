@@ -32,7 +32,7 @@ function Node({ name, value, path, depth, defaultOpen }) {
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? 'Collapse' : 'Expand'}
         >
-          {open ? '▼' : '▶'}
+          {open ? '−' : '+'}
         </button>
         {name !== undefined && (
           <>

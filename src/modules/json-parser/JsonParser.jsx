@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import useDebounce from '../../hooks/useDebounce';
-import { Panel, CodeArea, CopyButton, ClearButton, SampleButton, FileButton, Badge, Alert, Segmented, Stats, CodeOutput } from '../../components/ui';
+import { Panel, CodeArea, CopyButton, ClearButton, SampleButton, FileButton, Badge, Alert, Segmented, Stats, Button } from '../../components/ui';
 import { parseJson, SAMPLE_JSON, jsonStats, formatJson } from '../../lib/json';
 import JsonTree from './JsonTree';
+import JsonView from '../../components/JsonView';
 
 export default function JsonParser() {
   const [input, setInput] = useLocalStorage('json-parser.input', '');
@@ -12,6 +13,12 @@ export default function JsonParser() {
   const result = useMemo(() => parseJson(debounced), [debounced]);
   const stats = useMemo(() => (result.ok ? jsonStats(result.value) : null), [result]);
   const formatted = useMemo(() => (result.ok ? formatJson(result.value, 2) : ''), [result]);
+  // When the whole document is a JSON string (e.g. double-encoded JSON from a
+  // log), copy its contents without the wrapping quotes / escaping.
+  const isStringDoc = result.ok && typeof result.value === 'string';
+  const copyText = isStringDoc ? result.value : formatted;
+  const innerJson = useMemo(() => (isStringDoc ? parseJson(result.value) : null), [isStringDoc, result]);
+  const canUnwrap = !!(innerJson && innerJson.ok && innerJson.value !== null && typeof innerJson.value === 'object');
 
   const status = result.empty ? (
     <Badge>Waiting for input</Badge>
@@ -50,8 +57,13 @@ export default function JsonParser() {
           title={status}
           actions={
             <>
+              {canUnwrap && (
+                <Button size="sm" variant="primary" onClick={() => setInput(result.value)} title="The document is a JSON string that itself contains JSON — replace the input with its contents">
+                  Unwrap inner JSON
+                </Button>
+              )}
               <Segmented options={[{ value: 'tree', label: 'Tree' }, { value: 'text', label: 'Formatted' }]} value={view} onChange={setView} />
-              <CopyButton text={formatted} />
+              <CopyButton text={copyText} title={isStringDoc ? 'Copies the string contents without the surrounding quotes' : 'Copy formatted JSON'} />
             </>
           }
           footer={stats && <Stats items={[['Keys', stats.keys], ['Nodes', stats.nodes], ['Depth', stats.depth], ['Type', Array.isArray(result.value) ? 'array' : typeof result.value]]} />}
@@ -70,7 +82,7 @@ export default function JsonParser() {
             </div>
           )}
           {result.ok && view === 'tree' && <JsonTree value={result.value} />}
-          {result.ok && view === 'text' && <CodeOutput value={formatted} />}
+          {result.ok && view === 'text' && <JsonView value={result.value} />}
           {result.empty && <div className="empty-state">Paste or drop a JSON file to validate and explore it.</div>}
         </Panel>
       </div>

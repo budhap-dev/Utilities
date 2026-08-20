@@ -584,3 +584,95 @@ kbd {
   text-align: center;
   font-size: 13px;
 }
+
+/* ---------- JSON view (prettified with +/- toggles) ---------- */
+.jview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.jview__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.jview__body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-2);
+  background: var(--bg-code);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.jview__line {
+  display: flex;
+  align-items: baseline;
+  white-space: pre;
+  border-radius: 4px;
+}
+.jview__line:hover {
+  background: var(--bg-hover);
+}
+.jview__line--collapsed {
+  cursor: pointer;
+}
+.jview__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+  align-self: center;
+  cursor: pointer;
+}
+.jview__toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.jview__toggle--hidden {
+  visibility: hidden;
+}
+.jview__summary {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+/* Use the same +/- box for the parser tree toggles */
+.jtree__toggle {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  cursor: pointer;
+}
+.jtree__toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
