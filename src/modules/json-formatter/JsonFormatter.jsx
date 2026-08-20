@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import useDebounce from '../../hooks/useDebounce';
-import { Panel, CodeArea, CodeOutput, CopyButton, ClearButton, SampleButton, FileButton, Button, Select, Checkbox, Badge, Alert, Toolbar, Stats } from '../../components/ui';
+import { Panel, CodeArea, CodeOutput, CopyButton, ClearButton, SampleButton, FileButton, Button, Select, Checkbox, Badge, Alert, Toolbar, Stats, Segmented } from '../../components/ui';
 import { parseJson, formatJson, minifyJson, escapeJsonString, unescapeJsonString, SAMPLE_JSON } from '../../lib/json';
+import JsonView from '../../components/JsonView';
 
 const MODES = [
   { value: 'format', label: 'Format', done: 'Formatted' },
@@ -16,9 +17,10 @@ export default function JsonFormatter() {
   const [indent, setIndent] = useLocalStorage('json-formatter.indent', '2');
   const [sortKeys, setSortKeys] = useLocalStorage('json-formatter.sort', false);
   const [mode, setMode] = useState('format');
+  const [view, setView] = useLocalStorage('json-formatter.view', 'pretty');
   const debounced = useDebounce(input, 120);
 
-  const { output, error, empty } = useMemo(() => {
+  const { output, error, empty, parsed } = useMemo(() => {
     if (!debounced.trim()) return { empty: true, output: '' };
     if (mode === 'escape') return { output: escapeJsonString(debounced) };
     if (mode === 'unescape') {
@@ -27,8 +29,10 @@ export default function JsonFormatter() {
     }
     const r = parseJson(debounced);
     if (!r.ok) return { error: r.error.message + (r.error.line ? ` (line ${r.error.line}, col ${r.error.column})` : ''), output: '' };
-    return { output: mode === 'minify' ? minifyJson(r.value) : formatJson(r.value, indent, sortKeys) };
+    return { output: mode === 'minify' ? minifyJson(r.value) : formatJson(r.value, indent, sortKeys), parsed: r.value };
   }, [debounced, mode, indent, sortKeys]);
+
+  const showPretty = mode === 'format' && view === 'pretty' && parsed !== undefined;
 
   const download = () => {
     const blob = new Blob([output], { type: 'application/json' });
@@ -71,6 +75,9 @@ export default function JsonFormatter() {
           title={empty ? <Badge>Output</Badge> : error ? <Badge tone="danger">Error</Badge> : <Badge tone="success">{MODES.find((m) => m.value === mode).done}</Badge>}
           actions={
             <>
+              {mode === 'format' && (
+                <Segmented options={[{ value: 'pretty', label: 'Pretty' }, { value: 'raw', label: 'Raw' }]} value={view} onChange={setView} />
+              )}
               <Button size="sm" onClick={download} disabled={!output}>Download</Button>
               <CopyButton text={output} />
             </>
@@ -79,6 +86,8 @@ export default function JsonFormatter() {
         >
           {error ? (
             <div style={{ padding: 12 }}><Alert tone="danger">{error}</Alert></div>
+          ) : showPretty ? (
+            <JsonView value={parsed} indent={indent} sortKeys={sortKeys} />
           ) : (
             <CodeOutput value={output} wrap={mode === 'escape' || mode === 'minify'} placeholder="Formatted output will appear here" />
           )}
