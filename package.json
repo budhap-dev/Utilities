@@ -1,0 +1,53 @@
+{
+  "name": "devkit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DevKit — a developer's daily toolbelt: JSON, dates, diffs, encoders and more. Runs entirely in the browser.",
+  "scripts": {
+    "start": "webpack serve --mode development --open",
+    "dev": "webpack serve --mode development",
+    "build": "webpack --mode production",
+    "test": "jest"
+  },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 Edge versions"
+  ],
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "\\.css$": "<rootDir>/test/styleMock.js"
+    }
+  },
+  "dependencies": {
+    "cronstrue": "^3.24.0",
+    "date-fns": "^4.4.0",
+    "date-fns-tz": "^3.2.0",
+    "diff": "^9.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
+    "@babel/preset-react": "^8.0.1",
+    "babel-jest": "^30.4.1",
+    "babel-loader": "^10.1.1",
+    "copy-webpack-plugin": "^14.0.0",
+    "css-loader": "^7.1.4",
+    "html-webpack-plugin": "^5.6.8",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
+    "mini-css-extract-plugin": "^2.10.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.109.2",
+    "webpack-cli": "^7.2.2",
+    "webpack-dev-server": "^6.0.0"
+  }
+}
