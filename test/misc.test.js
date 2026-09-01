@@ -20,26 +20,68 @@ describe('color', () => {
 });
 
 describe('cron', () => {
-  test('parses fields', () => {
-    const f = parseCron('*/15 9-17 * * mon-fri');
-    expect([...f[0].set]).toEqual([0, 15, 30, 45]);
-    expect(f[1].set.size).toBe(9);
-    expect([...f[4].set]).toEqual([1, 2, 3, 4, 5]);
+  test('parses standard 5-field expressions', () => {
+    const p = parseCron('*/15 9-17 * * mon-fri');
+    expect(p.format).toBe('standard');
+    expect([...p.minute.set]).toEqual([0, 15, 30, 45]);
+    expect(p.hour.set.size).toBe(9);
+    expect([...p.dow.set]).toEqual([1, 2, 3, 4, 5]);
+  });
+  test('detects 6-field (seconds) and 7-field (quartz) layouts', () => {
+    const six = parseCron('*/30 * * * * *');
+    expect(six.format).toBe('seconds');
+    expect([...six.second.set]).toEqual([0, 30]);
+    const seven = parseCron('0 0 9 ? * MON-FRI 2027');
+    expect(seven.format).toBe('quartz');
+    expect(seven.hasSeconds && seven.hasYear).toBe(true);
+    expect([...seven.year.set]).toEqual([2027]);
+    expect([...seven.dow.set]).toEqual([1, 2, 3, 4, 5]); // Quartz names normalised to 0=SUN
+  });
+  test('quartz numeric weekdays use 1 = Sunday', () => {
+    expect([...parseCron('0 0 0 ? * 1 *').dow.set]).toEqual([0]);
+    expect([...parseCron('0 0 0 ? * 7 *').dow.set]).toEqual([6]);
+    expect([...parseCron('0 0 * * 0').dow.set]).toEqual([0]);
+  });
+  test('explicit format must match field count', () => {
+    expect(() => parseCron('* * * * *', 'quartz')).toThrow(/7 fields/);
   });
   test('aliases', () => {
-    expect(parseCron('@daily').map((f) => f.raw).join(' ')).toBe('0 0 * * *');
+    expect(parseCron('@daily').fields.map((f) => f.raw).join(' ')).toBe('0 0 * * *');
   });
   test('rejects bad input', () => {
-    expect(() => parseCron('* * *')).toThrow(/5 fields/);
+    expect(() => parseCron('* * *')).toThrow(/5, 6 or 7 fields/);
     expect(() => parseCron('60 * * * *')).toThrow(/range/);
+    expect(() => parseCron('0 0 0 15W * ? *')).toThrow(/Unsupported/);
   });
-  test('next runs', () => {
+  test('next runs (5 fields)', () => {
     const from = new Date(2026, 0, 1, 10, 7); // local
     const runs = nextRuns('30 9 * * *', 2, from);
     expect(runs[0].getHours()).toBe(9);
     expect(runs[0].getMinutes()).toBe(30);
     expect(runs[0].getDate()).toBe(2);
     expect(runs[1].getDate()).toBe(3);
+  });
+  test('next runs with seconds', () => {
+    const from = new Date(2026, 0, 1, 10, 0, 0);
+    const runs = nextRuns('*/20 * * * * *', 3, from);
+    expect(runs.map((d) => d.getSeconds())).toEqual([20, 40, 0]);
+    expect(runs[2].getMinutes()).toBe(1);
+  });
+  test('quartz year, L and # tokens', () => {
+    const from = new Date(2026, 0, 1);
+    const y = nextRuns('0 0 0 1 1 ? 2028', 1, from)[0];
+    expect(y.getFullYear()).toBe(2028);
+    const last = nextRuns('0 0 12 L * ? *', 2, from);
+    expect(last[0].getDate()).toBe(31); // Jan 31
+    expect(last[1].getDate()).toBe(28); // Feb 28 2026
+    const thirdFri = nextRuns('0 0 12 ? * FRI#3 *', 1, from)[0];
+    expect(thirdFri.getDay()).toBe(5);
+    expect(thirdFri.getDate()).toBe(16); // 3rd Friday of Jan 2026
+    const lastFri = nextRuns('0 0 12 ? * FRIL *', 1, from)[0];
+    expect(lastFri.getDate()).toBe(30); // last Friday of Jan 2026
+  });
+  test('past-only year yields no runs', () => {
+    expect(nextRuns('0 0 0 1 1 ? 2020', 3, new Date(2026, 0, 1))).toEqual([]);
   });
 });
 
