@@ -2,6 +2,8 @@
 
 A developer's daily toolbelt — JSON, dates, diffs, encoders and more — as a single React + webpack app that runs **entirely in the browser**. Nothing you paste ever leaves your machine.
 
+**Live:** https://happy-coast-0cd311810.7.azurestaticapps.net
+
 > Read the product story, personas, module list and roadmap in [docs/STORY.md](docs/STORY.md).
 
 ## Tools
@@ -20,6 +22,8 @@ Shell features: collapsible sidebar with filter, command palette (`⌘K` / `Ctrl
 ## Getting started
 
 ```bash
+git clone https://github.com/budhap-dev/devkit-utils.git
+cd devkit-utils
 npm install
 npm start        # dev server on http://localhost:3000 (opens browser)
 npm run build    # production bundle in dist/
