@@ -2,6 +2,8 @@
 
 A developer's daily toolbelt — JSON, dates, diffs, encoders and more — as a single React + webpack app that runs **entirely in the browser**. Nothing you paste ever leaves your machine.
 
+**Live:** https://happy-coast-0cd311810.7.azurestaticapps.net
+
 > Read the product story, personas, module list and roadmap in [docs/STORY.md](docs/STORY.md).
 
 ## Tools
