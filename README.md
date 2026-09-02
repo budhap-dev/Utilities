@@ -22,6 +22,8 @@ Shell features: collapsible sidebar with filter, command palette (`⌘K` / `Ctrl
 ## Getting started
 
 ```bash
+git clone https://github.com/budhap-dev/devkit-utils.git
+cd devkit-utils
 npm install
 npm start        # dev server on http://localhost:3000 (opens browser)
 npm run build    # production bundle in dist/
